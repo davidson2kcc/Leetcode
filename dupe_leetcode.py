@@ -5,8 +5,8 @@ import time
 import json
 import requests
 
-LEETCODE_SESSION = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJfYXV0aF91c2VyX2lkIjoiMjIzMDMzOTEiLCJfYXV0aF91c2VyX2JhY2tlbmQiOiJhbGxhdXRoLmFjY291bnQuYXV0aF9iYWNrZW5kcy5BdXRoZW50aWNhdGlvbkJhY2tlbmQiLCJfYXV0aF91c2VyX2hhc2giOiIyYTI2ZGYxNDkyNzFkOGM5MzQxZWIxNWRhMDVhYjNhNmUzOTU3MzQyOTE3OTI0Mjk1MzczZTc2NWY4YzQ2ODIyIiwic2Vzc2lvbl91dWlkIjoiYTc1ZDg4ZDkiLCJpZCI6MjIzMDMzOTEsImVtYWlsIjoiYWxhZ2lyaXByYXZlZW5AZ21haWwuY29tIiwidXNlcm5hbWUiOiJQcmF2ZWVua3VtYXIzNzMiLCJ1c2VyX3NsdWciOiJQcmF2ZWVua3VtYXIzNzMiLCJhdmF0YXIiOiJodHRwczovL2Fzc2V0cy5sZWV0Y29kZS5jb20vdXNlcnMvZGVmYXVsdF9hdmF0YXIuanBnIiwicmVmcmVzaGVkX2F0IjoxNzgyMTQyMDU4LCJpcCI6IjE1Ny41MS43OS43NyIsImlkZW50aXR5IjoiMTZmZWUzNzU1OWRiZDQyYjQ0ODIwNDQ0NmQwMjA4OWYiLCJkZXZpY2Vfd2l0aF9pcCI6WyIzZTJmN2RjOTY2OGI1OTA1MDViYjcwNGMwNzA0Y2FkNyIsIjE1Ny41MS43OS43NyJdLCJfc2Vzc2lvbl9leHBpcnkiOjEyMDk2MDB9.Oa-VSnK-fR9Zp_Stx9Z1o6lb1wz8aigBb_6OhF8paJg"
-CSRF_TOKEN = "aYc0qhko3SX4OIhTaxfC7LZZ9v548f3U"
+LEETCODE_SESSION = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJfYXV0aF91c2VyX2lkIjoiMjIzMDMzOTEiLCJfYXV0aF91c2VyX2JhY2tlbmQiOiJhbGxhdXRoLmFjY291bnQuYXV0aF9iYWNrZW5kcy5BdXRoZW50aWNhdGlvbkJhY2tlbmQiLCJfYXV0aF91c2VyX2hhc2giOiIyYTI2ZGYxNDkyNzFkOGM5MzQxZWIxNWRhMDVhYjNhNmUzOTU3MzQyOTE3OTI0Mjk1MzczZTc2NWY4YzQ2ODIyIiwic2Vzc2lvbl91dWlkIjoiYzgzMDc1ZDUiLCJpZCI6MjIzMDMzOTEsImVtYWlsIjoiYWxhZ2lyaXByYXZlZW5AZ21haWwuY29tIiwidXNlcm5hbWUiOiJQcmF2ZWVua3VtYXIzNzMiLCJ1c2VyX3NsdWciOiJQcmF2ZWVua3VtYXIzNzMiLCJhdmF0YXIiOiJodHRwczovL2Fzc2V0cy5sZWV0Y29kZS5jb20vdXNlcnMvZGVmYXVsdF9hdmF0YXIuanBnIiwicmVmcmVzaGVkX2F0IjoxNzgyMzQ5MTY5LCJpcCI6IjE1Ny41MS43OS4yMiIsImlkZW50aXR5IjoiNmIyMjFhZDFhOGIwYzYwZGYxOGY4Njg2YjQ4NzY4NzgiLCJkZXZpY2Vfd2l0aF9pcCI6WyI4NzZmZTBkOGUzMWExYzRiZWE2ODg3YzQ3MGI1NGYwNyIsIjE1Ny41MS43OS4yMiJdLCJfc2Vzc2lvbl9leHBpcnkiOjEyMDk2MDB9.88EmOkOFyEti1a4fuz5ByN6Rq20DzflH8yQAzw3UkI0"
+CSRF_TOKEN = "5eZeVATkHsq2cp9WBHrnRo4Tme5bs2GH"
 
 if not LEETCODE_SESSION or not CSRF_TOKEN:
     print("Missing environment variables.")
@@ -20,7 +20,6 @@ GRAPHQL_URL = f"{BASE_URL}/graphql"
 OUTPUT_DIR = "."
 PROGRESS_FILE = ".export_progress.json"
 DELAY_SECONDS = 1.5
-TOPICS_PER_PROBLEM = 2
 
 EXT_MAP = {
     "python3": "py",
@@ -169,16 +168,18 @@ def html_to_text(html_content):
     return text.strip()
 
 
-def build_readme(question, problem_url, topics):
+def build_readme(question, problem_url, folder_topic):
     title = question["title"]
     difficulty = question["difficulty"]
     content_html = question["content"] or ""
     content_text = html_to_text(content_html)
-    topics_line = ", ".join(topics) if topics else "Uncategorized"
+    all_tags = [tag["name"] for tag in question.get("topicTags", [])]
+    all_tags_line = ", ".join(all_tags) if all_tags else "Uncategorized"
 
     readme = f"# {question['questionId']}. {title}\n\n"
     readme += f"**Difficulty:** {difficulty}\n\n"
-    readme += f"**Topics:** {topics_line}\n\n"
+    readme += f"**Folder Topic:** {folder_topic}\n\n"
+    readme += f"**All Topics:** {all_tags_line}\n\n"
     readme += f"**Link:** {problem_url}\n\n"
     readme += "---\n\n"
     readme += content_text + "\n"
@@ -195,10 +196,78 @@ def safe_file_name(name):
     return name.strip()
 
 
-def get_top_topics(question, max_topics):
+TOPIC_PRIORITY = [
+    "Trie",
+    "Union Find",
+    "Segment Tree",
+    "Binary Indexed Tree",
+    "Topological Sort",
+    "Minimum Spanning Tree",
+    "Shortest Path",
+    "Strongly Connected Component",
+    "Eulerian Circuit",
+    "Biconnected Component",
+    "Monotonic Stack",
+    "Monotonic Deque",
+    "Sliding Window",
+    "Two Pointers",
+    "Binary Search",
+    "Backtracking",
+    "Dynamic Programming",
+    "Greedy",
+    "Divide and Conquer",
+    "Bit Manipulation",
+    "Bitmask",
+    "Recursion",
+    "Memoization",
+    "Graph",
+    "Tree",
+    "Binary Tree",
+    "Binary Search Tree",
+    "Depth-First Search",
+    "Breadth-First Search",
+    "Heap (Priority Queue)",
+    "Hash Table",
+    "Hash Function",
+    "Linked List",
+    "Stack",
+    "Queue",
+    "Counting",
+    "Prefix Sum",
+    "Sorting",
+    "String Matching",
+    "Rolling Hash",
+    "Game Theory",
+    "Geometry",
+    "Combinatorics",
+    "Number Theory",
+    "Randomized",
+    "Probability and Statistics",
+    "Concurrency",
+    "Design",
+    "Simulation",
+    "Interactive",
+    "Data Stream",
+    "Iterator",
+    "Database",
+    "Shell",
+    "String",
+    "Array",
+    "Matrix",
+    "Math",
+    "Brainteaser",
+]
+
+
+def get_best_topic(question):
     tags = question.get("topicTags", [])
     names = [tag["name"] for tag in tags]
-    return names[:max_topics] if names else ["Uncategorized"]
+    if not names:
+        return "Uncategorized"
+    for priority_name in TOPIC_PRIORITY:
+        if priority_name in names:
+            return priority_name
+    return names[0]
 
 
 def load_progress():
@@ -274,14 +343,13 @@ def main():
         lang = submission["lang"]
         ext = EXT_MAP.get(lang, "txt")
 
-        top_topics = get_top_topics(question, TOPICS_PER_PROBLEM)
+        best_topic = get_best_topic(question)
         problem_url = f"{BASE_URL}/problems/{slug}/"
-        readme_content = build_readme(question, problem_url, top_topics)
+        readme_content = build_readme(question, problem_url, best_topic)
 
-        for topic in top_topics:
-            write_problem_files(topic, frontend_id, title, code, ext, readme_content)
+        write_problem_files(best_topic, frontend_id, title, code, ext, readme_content)
 
-        print(f"  Saved to: {', '.join(top_topics)}")
+        print(f"  Saved to: {best_topic}")
 
         done_slugs.add(slug)
         progress["done_slugs"] = list(done_slugs)

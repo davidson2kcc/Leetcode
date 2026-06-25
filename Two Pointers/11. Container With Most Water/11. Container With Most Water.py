@@ -1,5 +1,5 @@
-class Solution(object):
-    def maxArea(self, height):
+class Solution:
+    def maxArea(self, height: List[int]) -> int:
         i=0
         j=len(height)-1
         m=0
@@ -13,7 +13,3 @@ class Solution(object):
 
         return m
             
-        
-        
-
-
